@@ -13,12 +13,13 @@
  *    - space between words = 7 bits, OFF
  *  bit length is determined by timer0
  */
-static const uint64_t msg = 0x000e3ab8abb88ea8; // VE7XT, left zero padded by 8
+static const uint64_t msg = 0x000e3ab8abb88ea8; // VE7XT, left zero padded by 8 bits
 
 ISR(TIMER1_COMPA_vect) {
   static unsigned int id = 0;
-  if((msg >> id) & 1) PORTA |= 0x0f; // turn on leds
-  else PORTA &= 0xf0; // turn off leds
+  // shift through message and mask out relevant bit
+  if((msg >> id) & 1) PORTA |= 0x04; // turn on led
+  else PORTA &= 0xfb; // turn off led
   id = (id + 1) % MSG_LENGTH;
 }
 
@@ -31,9 +32,9 @@ void setup() {
   // power reduction
   PRR = 0x07; // disable clocks to timer0, USI, and ADC
 
-  // init PA0/1/2/3 as output
-  DDRA |= 0x0f;
-  PORTA &= 0xf0; // turn leds off
+  // init PA2 as output
+  DDRA |= 0x04;
+  PORTA &= 0xfb; // turn leds off
 
   // setup timer
   TCCR1A = 0x00;
@@ -43,5 +44,6 @@ void setup() {
 }
 
 void loop() {
-
+  // don't need to do anything here
+  // morse blink is handled in interrupt
 }
